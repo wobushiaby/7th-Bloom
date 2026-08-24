@@ -191,7 +191,6 @@
 
         /* Summary / Receipt Section */
         #summary-card {
-            display: none; 
             background-color: var(--bg-color);
             margin: 20px 25px 25px;
             padding: 20px;
@@ -252,7 +251,7 @@
             background: white;
             padding: 10px;
             border-radius: 10px;
-            width: 40%; /* Para magkasya yung 2 sa taas at 1 sa gitna */
+            width: 40%;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
             cursor: zoom-in;
             transition: transform 0.3s ease;
@@ -402,65 +401,77 @@
                     <div class="word-counter"><span id="word-count">0</span> / 15 words</div>
                 </div>
 
-                <button class="btn" onclick="generateSummary()">Generate Order Summary</button>
+                <button class="btn" onclick="generateSummary()">Proceed to Summary</button>
                 <button class="btn-back" onclick="location.reload()">Back to Home</button>
             </div>
         </div>
 
-        <!-- SUMMARY SECTION (RECEIPT) -->
-        <div id="summary-card">
-            <div class="summary-title">Order Summary</div>
+        <!-- STEP 3: ORDER SUMMARY (Confirm Button here) -->
+        <div id="step-3" class="step">
+            <div class="section-title">Step 3: Order Summary</div>
             
-            <div class="order-details">
-                <p><strong>Date:</strong> <span id="s-date"></span></p>
-                <p><strong>Time:</strong> <span id="s-time"></span></p>
-                <p><strong>Receiver:</strong> <span id="s-name"></span> (<span id="s-contact"></span>)</p>
-                <p><strong>Address:</strong> <span id="s-address"></span></p>
-                <p><strong>Wrapper:</strong> <span id="s-color"></span></p>
-                <p><strong>Message:</strong> "<span id="s-message"></span>"</p>
-            </div>
+            <div id="summary-card" style="margin-top: 10px;">
+                <div class="order-details">
+                    <p><strong>Date:</strong> <span id="s-date"></span></p>
+                    <p><strong>Time:</strong> <span id="s-time"></span></p>
+                    <p><strong>Receiver:</strong> <span id="s-name"></span> (<span id="s-contact"></span>)</p>
+                    <p><strong>Address:</strong> <span id="s-address"></span></p>
+                    <p><strong>Wrapper:</strong> <span id="s-color"></span></p>
+                    <p><strong>Message:</strong> "<span id="s-message"></span>"</p>
+                </div>
 
-            <div class="summary-row">
-                <span>TOTAL:</span>
-                <span id="disp-total">₱ 0.00</span>
-            </div>
-            <div class="summary-row">
-                <span>DOWN PAYMENT:</span>
-                <span id="disp-dp">₱ 0.00</span>
-            </div>
-            <div class="summary-row balance">
-                <span>REMAINING BALANCE:</span>
-                <span id="disp-balance">₱ 0.00</span>
-            </div>
+                <div class="summary-row">
+                    <span>TOTAL:</span>
+                    <span id="disp-total">₱ 0.00</span>
+                </div>
+                <div class="summary-row">
+                    <span>DOWN PAYMENT:</span>
+                    <span id="disp-dp">₱ 0.00</span>
+                </div>
+                <div class="summary-row balance">
+                    <span>REMAINING BALANCE:</span>
+                    <span id="disp-balance">₱ 0.00</span>
+                </div>
 
-            <!-- 3 QR Codes (GCash, Maya, Maribank) -->
-            <div class="qr-section">
-                <div class="qr-box" onclick="zoomQR(this)">
-                    <h4>GCASH</h4>
-                    <div class="qr-image">
-                        <img src="gcash.png" alt="GCash QR">
+                <button class="btn" onclick="confirmOrder()">Confirm Order</button>
+                <button class="btn-back" onclick="goToStep(2)">Edit Details</button>
+            </div>
+        </div>
+
+        <!-- STEP 4: CONFIRMATION (Thank You + QR) -->
+        <div id="step-4" class="step">
+            <div class="section-title">Payment</div>
+            
+            <div class="form-section">
+                <!-- QR Codes -->
+                <div class="qr-section">
+                    <div class="qr-box" onclick="zoomQR(this)">
+                        <h4>GCASH</h4>
+                        <div class="qr-image">
+                            <img src="gcash.png" alt="GCash QR">
+                        </div>
+                    </div>
+
+                    <div class="qr-box" onclick="zoomQR(this)">
+                        <h4>MAYA</h4>
+                        <div class="qr-image">
+                            <img src="maya.png" alt="Maya QR">
+                        </div>
+                    </div>
+
+                    <div class="qr-box" onclick="zoomQR(this)">
+                        <h4>MARIBANK</h4>
+                        <div class="qr-image">
+                            <img src="mari.png" alt="Maribank QR">
+                        </div>
                     </div>
                 </div>
 
-                <div class="qr-box" onclick="zoomQR(this)">
-                    <h4>MAYA</h4>
-                    <div class="qr-image">
-                        <img src="maya.png" alt="Maya QR">
-                    </div>
+                <!-- Thank You Message -->
+                <div class="thank-you">
+                    <strong>Thank you for ordering! 🌸</strong>
+                    Please send the screenshot of your payment once paid so we can process your order.
                 </div>
-
-                <div class="qr-box" onclick="zoomQR(this)">
-                    <h4>MARIBANK</h4>
-                    <div class="qr-image">
-                        <img src="mari.png" alt="Maribank QR">
-                    </div>
-                </div>
-            </div>
-
-            <!-- Thank You Message (Walang Start New Order) -->
-            <div class="thank-you">
-                <strong>Thank you for ordering! 🌸</strong>
-                Please send the screenshot of your payment once paid so we can process your order.
             </div>
         </div>
     </div>
@@ -469,6 +480,12 @@
     <div class="overlay" id="overlay" onclick="closeZoom()"></div>
 
     <script>
+        // Step Navigation helper
+        function goToStep(stepNumber) {
+            document.querySelectorAll('.step').forEach(step => step.classList.remove('active'));
+            document.getElementById('step-' + stepNumber).classList.add('active');
+        }
+
         // 1. ADMIN LOGIC: Gumagawa ng link para kay client
         function generateLink() {
             const total = document.getElementById('total').value;
@@ -479,11 +496,9 @@
                 return;
             }
 
-            // Kunin ang current URL ng website/file mo, tapos idagdag yung total at dp
-            const currentURL = window.location.href.split('?')[0]; // Tanggalin yung existing '?' kung meron
+            const currentURL = window.location.href.split('?')[0]; 
             const newLink = currentURL + "?total=" + total + "&dp=" + dp;
 
-            // Ipakita yung link
             document.getElementById('generated-link').innerText = newLink;
             document.getElementById('link-area').style.display = 'block';
         }
@@ -502,11 +517,7 @@
             const dp = urlParams.get('dp');
 
             if (total && dp) {
-                // May laman yung URL, so Client ito. Itago yung Step 1, Ipakita yung Step 2.
-                document.getElementById('step-1').classList.remove('active');
-                document.getElementById('step-2').classList.add('active');
-
-                // I-lock yung presyo sa Step 2
+                goToStep(2);
                 const balance = parseFloat(total) - parseFloat(dp);
                 
                 document.getElementById('locked-total').innerText = '₱ ' + parseFloat(total).toFixed(2);
@@ -524,7 +535,6 @@
             const currentCount = words.length;
 
             if (currentCount > 15) {
-                // Kunin yung unang 15 words, tapos i-join ulit
                 const limitedWords = words.slice(0, 15).join(' ');
                 this.value = limitedWords;
                 wordCountDisplay.innerText = 15;
@@ -533,15 +543,13 @@
             }
         });
 
-        // 4. FINAL SUMMARY
+        // 4. SUMMARY GENERATION
         function generateSummary() {
-            // Kunin yung presyo mula sa URL
             const urlParams = new URLSearchParams(window.location.search);
             const total = parseFloat(urlParams.get('total'));
             const dp = parseFloat(urlParams.get('dp'));
             const balance = total - dp;
 
-            // Kunin yung form details
             const date = document.getElementById('f-date').value || 'N/A';
             const time = document.getElementById('f-time').value || 'N/A';
             const name = document.getElementById('f-name').value || 'N/A';
@@ -558,7 +566,7 @@
                 }
             }
 
-            // I-populate yung summary
+            // Populate Summary
             document.getElementById('s-date').innerText = date;
             document.getElementById('s-time').innerText = time;
             document.getElementById('s-name').innerText = name;
@@ -571,9 +579,12 @@
             document.getElementById('disp-dp').innerText = '₱ ' + dp.toFixed(2);
             document.getElementById('disp-balance').innerText = '₱ ' + balance.toFixed(2);
 
-            // Itago yung Step 2, Ipakita yung Summary
-            document.getElementById('step-2').classList.remove('active');
-            document.getElementById('summary-card').style.display = 'block';
+            goToStep(3);
+        }
+
+        // 5. CONFIRM ORDER
+        function confirmOrder() {
+            goToStep(4);
         }
 
         // Zoom Function
