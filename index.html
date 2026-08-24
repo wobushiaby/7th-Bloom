@@ -115,6 +115,14 @@
             background-color: #fff;
         }
 
+        /* Word Counter */
+        .word-counter {
+            font-size: 0.8rem;
+            color: #888;
+            text-align: right;
+            margin-top: 5px;
+        }
+
         /* Wrapper Colors */
         .wrapper-options {
             display: flex;
@@ -167,19 +175,6 @@
             font-weight: bold;
             cursor: pointer;
             margin-top: 10px;
-        }
-
-        .btn-reset {
-            background: transparent;
-            border: none;
-            color: #888;
-            margin-top: 15px;
-            cursor: pointer;
-            text-decoration: underline;
-            font-size: 0.9rem;
-            text-align: center;
-            display: block;
-            width: 100%;
         }
 
         /* Admin Link Generator */
@@ -244,19 +239,20 @@
             font-size: 1.1rem;
         }
 
-        /* Zoomable QR Codes */
+        /* Zoomable QR Codes (3 codes layout) */
         .qr-section {
             display: flex;
-            justify-content: space-around;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
             margin-top: 20px;
-            gap: 10px;
         }
 
         .qr-box {
             background: white;
             padding: 10px;
             border-radius: 10px;
-            width: 45%;
+            width: 40%; /* Para magkasya yung 2 sa taas at 1 sa gitna */
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
             cursor: zoom-in;
             transition: transform 0.3s ease;
@@ -293,6 +289,23 @@
             cursor: zoom-out;
             width: 250px; 
             border: 3px solid var(--accent-orange);
+        }
+
+        /* Thank You Message */
+        .thank-you {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            color: var(--text-color);
+        }
+
+        .thank-you strong {
+            color: var(--accent-orange);
+            display: block;
+            margin-bottom: 5px;
+            font-size: 1.1rem;
         }
 
         /* Overlay for zoomed background */
@@ -385,7 +398,8 @@
                 
                 <div class="form-group">
                     <label>Message (Max. 15 words)</label>
-                    <textarea id="f-message" maxlength="15" placeholder="Type your message here..."></textarea>
+                    <textarea id="f-message" placeholder="Type your message here..."></textarea>
+                    <div class="word-counter"><span id="word-count">0</span> / 15 words</div>
                 </div>
 
                 <button class="btn" onclick="generateSummary()">Generate Order Summary</button>
@@ -419,25 +433,35 @@
                 <span id="disp-balance">₱ 0.00</span>
             </div>
 
+            <!-- 3 QR Codes (GCash, Maya, Maribank) -->
             <div class="qr-section">
                 <div class="qr-box" onclick="zoomQR(this)">
-                    <h4>GCASH / MAYA</h4>
-                    <!-- PALITAN ANG SRC NG QR MO -->
+                    <h4>GCASH</h4>
                     <div class="qr-image">
-                        <img src="https://via.placeholder.com/150/FFD700/000000?text=GCash+QR" alt="GCash QR">
+                        <img src="gcash.png" alt="GCash QR">
+                    </div>
+                </div>
+
+                <div class="qr-box" onclick="zoomQR(this)">
+                    <h4>MAYA</h4>
+                    <div class="qr-image">
+                        <img src="maya.png" alt="Maya QR">
                     </div>
                 </div>
 
                 <div class="qr-box" onclick="zoomQR(this)">
                     <h4>MARIBANK</h4>
-                    <!-- PALITAN ANG SRC NG QR MO -->
                     <div class="qr-image">
-                        <img src="https://via.placeholder.com/150/FF9F5A/FFFFFF?text=Mari+QR" alt="Maribank QR">
+                        <img src="mari.png" alt="Maribank QR">
                     </div>
                 </div>
             </div>
 
-            <button class="btn-reset" onclick="location.reload()">Start New Order</button>
+            <!-- Thank You Message (Walang Start New Order) -->
+            <div class="thank-you">
+                <strong>Thank you for ordering! 🌸</strong>
+                Please send the screenshot of your payment once paid so we can process your order.
+            </div>
         </div>
     </div>
 
@@ -491,7 +515,25 @@
             }
         };
 
-        // 3. FINAL SUMMARY
+        // 3. MAXIMUM 15 WORDS Function
+        const messageInput = document.getElementById('f-message');
+        const wordCountDisplay = document.getElementById('word-count');
+
+        messageInput.addEventListener('input', function() {
+            const words = this.value.trim().split(/\s+/).filter(word => word.length > 0);
+            const currentCount = words.length;
+
+            if (currentCount > 15) {
+                // Kunin yung unang 15 words, tapos i-join ulit
+                const limitedWords = words.slice(0, 15).join(' ');
+                this.value = limitedWords;
+                wordCountDisplay.innerText = 15;
+            } else {
+                wordCountDisplay.innerText = currentCount;
+            }
+        });
+
+        // 4. FINAL SUMMARY
         function generateSummary() {
             // Kunin yung presyo mula sa URL
             const urlParams = new URLSearchParams(window.location.search);
